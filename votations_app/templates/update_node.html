@@ -1,0 +1,70 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Actualizar Nodo</h1>
+        <p>Ingresa la información faltante, el par de claves se genera internamente y la clave privada se crea de acuerdo a la contraseña,
+            por ello, si se cambia la contraseña, se debe actualizar el par de claves mediante el formulario. 
+            Sin embargo, las claves se usan mientras se valida el bloque, no es tan necesario posteriormente, por ello no importa si se cambian.</p>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="col-md-6 offset-md-3 mt-5">
+        {% if user.is_authenticated and user_in_group.nodes %}
+
+            <form action="{% url 'update_node' %}" method="post" class="card card-body">
+                {% csrf_token %}
+
+                <fieldset>                   
+                    <div class="mb-3">
+                        <label for="creator">Nodo editado por:</label>
+                        <input type="text" name="creator" id="creator" class="form-control" value="{{ user.username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="node_id">Id del nodo:</label>
+                        <input value="{{ node.node_id }}" type="text" name="node_id" id="node_id" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="publick_key">Clave pública:</label>
+                        <input value="{{ node.public_key }}" type="text" name="publick_key" id="publick_key" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ip_address">Dirección IP:</label>
+                        <input value="{{ node.ip_address }}" type="text" name="ip_address" id="ip_address" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="net_address">Dirección web del servidor:</label>
+                        <input value="{{ node.net_address }}" type="text" name="net_address" id="net_address" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location">Ubicación geográfica del nodo:</label>
+                        <input value="{{ node.location }}" type="text" name="location" id="location" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="processing_capacity">Capacidad de procesamiento del nodo:</label>
+                        <input value="{{ node.processing_capacity }}" type="text" name="processing_capacity" id="processing_capacity" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password">Contraseña para generación de claves:</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                        <p><strong>debe ser la misma de la cuenta</strong></p>
+                    </div>                   
+
+                </fieldset>
+                <input type="submit" value="Actualizar nodo" class="btn btn-primary">
+            </form>
+
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

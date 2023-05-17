@@ -1,0 +1,76 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Elecciones #{{ commission.id }} - {{ commission.title }}</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+        <section class="card card-body">
+
+            {% if user_in_group.admins %}
+            
+                <p>Como administrador, no se le permite realizar votación alguna.</p>
+
+            {% elif user_in_group.voters or user_in_group.candidates %}
+                
+                <div class="row py4">
+                    <p>Cantidad de candidatos: {{ candidates.count }}</p>
+                    {% for candidate in candidates %}
+                       
+                        <div class="col-md-5 mt-2 ml-8">
+                            <h5 class="card-title"></h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class"card-title">Nombres: {{ candidate.get_full_name }}</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">Grupo: {{ candidate.userdetail.candidate_group }}</h6>
+                                    
+                                    {% if candidate.userdetail.propossals %}
+                                    <ul>
+                                        <p>Listado de propuestas</p>
+                                        {% for key, value in candidate.userdetail.propossals.items %}
+                                            <li><p class="card-text">{{value}}</p></li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                    
+                                    <p class="card-text">votations_voters: {{ candidate.userdetail }}</p>
+                                    
+                                    {% if candidate.userdetail.is_candidate %}
+                                        <form action="{% url 'vote' commission.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="text" hidden id="commission_id" name="commission_id" value="{{ commission.id }}">
+                                            <input type="text" hidden id="candidate_id" name="candidate_id" value="{{ candidate.id }}">
+                                            <button class="btn btn-primary">Votar</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="text-center">
+                    <a href="{% url 'signin' %}" class="btn btn-primary">Ingresar</a>
+                    <a href="{% url 'signup' %}" class="btn btn-secondary">Registrarse</a>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+</div>
+
+
+{% endblock content %}

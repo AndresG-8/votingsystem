@@ -1,0 +1,62 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Listado de nodos registrados</h1>
+        <p>Recuerda que los nodos son aquellos servidores que tienen un usuario normal pero que se asignan al grupo de "Nodes"
+            y tienen permiso para tomar las transacciones y crear bloques, luego agregar dichos bloques a la cadena de bloques
+        </p>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="col-md-12 mt-5">
+        {% if user.is_authenticated and user_in_group.admins %}
+                
+            {% if register_nodes %}
+                <section class="card card-body">
+                    <h1 class="text-center">Nodos registrados</h1>
+                    <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                            <th>Node ID</th>
+                            <th>IP Address</th>
+                            <th>Net Address</th>
+                            <th>Location</th>
+                            <th>Processing Capacity</th>
+                            <th>Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for node in register_nodes %}
+                            <tr>
+                            <td>{{ node.node_id }}</td>
+                            <td>{{ node.ip_address }}</td>
+                            <td>{{ node.net_address }}</td>
+                            <td>{{ node.location }}</td>
+                            <td>{{ node.processing_capacity }}</td>
+                            <td>{% if node.active %}Active{% else %}Inactive{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>                  
+                </section> 
+           
+            {% endif %} 
+        {% else %}
+            <p>Lo sentimos, aparentemente no tienes permisos suficientes para ver esta información.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

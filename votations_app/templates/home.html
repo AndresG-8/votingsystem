@@ -1,0 +1,170 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">BLOCKCHAIN VOTATIONS SYSTEM</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-11 offset-md-1 mt-2">
+
+        {% if user.is_authenticated %}
+            <section class="card card-body">
+                <p>Buenas tardes, {{ user.username|capfirst }}. Estas son las opciones disponibles según el grupo asignado</p>
+
+                {% if user_in_group.admins %}
+                    <div class="text-center mt-2">
+                        <a href="{% url 'start_commissions' %}" class="btn btn-primary">Iniciar Proceso Electoral</a>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <a href="{% url 'add_node' %}" class="btn btn-primary">Agregar un nodo</a>
+                    </div>
+                    
+                {% elif user_in_group.candidates %}
+                    <p>Candidatos</p>
+                    <div class="row">
+                        <ul class="list-group">
+                            {% for active_commission in active_commissions %}
+                                <li class="list-group-item">
+                                    <p><strong>{{ active_commission.description }}</strong></p>
+                                    <a href="{% url 'vote' active_commission.id %}" class="btn btn-primary">{{ active_commission.title }}</a>
+                                    <p>Fecha inicio: {{ active_commission.initial_date }} - Fecha fin: {{ active_commission.final_date }}</p> 
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="row card mt-2">
+                        <p><strong>Perfil personal</strong></p>
+                        <div class="row col-md-12">
+                            <div class="col-md-2 card">
+                                <div class="text-center py-4">
+                                    {% if user_detail.profile_image %}
+                                        <img src="{{ user_detail.profile_image.url }}" alt="Imagen de perfil" heigth="100px" width="100px">
+                                    {% else %}
+                                        <p>No profile image available.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ user.first_name }} {{ user.last_name }}</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">{{ user.email }}</h6>
+                                        <p class="card-text">Grupo/Plancha: {{ user_detail.candidate_group }}</p>
+                                        <a href="{% url 'profile' %}" class="card-link">Editar perfil</a>
+                                    </div>          
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p>Contador de votos recibidos: {{ user_detail.votes_received }}</p>
+                    
+                    </div>
+                                        
+                {% elif user_in_group.voters %}
+                    
+                    <p>Votantes</p>
+
+                    <ul class="list-group">
+                    {% for active_commission in active_commissions %}
+                        <li class="list-group-item">
+                            <p><strong>{{ active_commission.description }}</strong></p>
+                            <a href="{% url 'vote' active_commission.id %}" class="btn btn-primary">{{ active_commission.title }}</a>
+                            <p>Fecha inicio: {{ active_commission.initial_date }} - Fecha fin: {{ active_commission.final_date }}</p> 
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% elif user_in_group.nodes %}
+                    
+                    <p>Nodos</p>
+
+                    <div class="text-center mt-2">
+                        <a href="{% url 'update_node' %}" class="btn btn-primary">Actualizar nodo asignado</a>
+                    </div>
+                
+                {% else %}
+                <div class="text-center">
+                    <p><strong>No estas registrado en ningún grupo, no tienes opciones disponibles</strong></p>
+                </div>
+                
+                {% endif %}
+            </section>
+        {% else %}
+            <div class="text-center">
+                <a href="{% url 'signin' %}" class="btn btn-primary mt-2 mb-2">Ingresar</a>
+                <a href="{% url 'signup' %}" class="btn btn-secondary mt-2 mb-2">Registrarse</a>
+            </div>
+        {% endif %}
+    
+    </div>
+</div>
+
+<div class="row py5">
+    <div class="col-md-6 mt-2">
+
+        {% if latest_transactions_list %}
+            {% for trx in latest_transactions_list %}
+            <section class="card card-body">
+                {% comment %} <p>{{ trx.block.chain }}</p> {% endcomment %}
+                <ul class="list-group">
+                    <li class="list-group-item">{{ trx.block }} - {{ trx }}</li>
+                </ul>
+            </section>  
+            {% endfor %}    
+        {% else %}
+            <p>No hay transacciones para mostrar</p>
+        {% endif %}
+
+    </div>
+
+    <div class="col-md-6 mt-2">
+        {% if user.is_authenticated and user_in_group.nodes %}
+        
+            <ul class="list-group">
+                {% for active_commission in active_commissions %}
+                    <li class="list-group-item">
+                        <div class="text-center mt-2 mb-1">
+                            {% comment %} <a href="{% url 'get_trxs' active_commission.id %}" class="btn btn-secondary"></a> {% endcomment %}
+                            
+                            <form action="{% url 'get_trxs' %}" method="POST">
+                                {% csrf_token %}
+                                <input type="text" hidden id="commission_id" name="commission_id" value="{{ active_commission.id }}">
+                                <button class="btn btn-secondary">Tomar transacciones de {{active_commission.title}}</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>            
+        {% endif %}
+
+        {% if latest_mempool_trx %}
+            <section class="card card-body">
+                {% for trx in latest_mempool_trx %}
+                    <ul class="list-group">
+                        <li class="list-group-item">Mempool Tran: {{ trx.id }} - {{ trx }}</li>
+                    </ul>
+                {% endfor %}    
+            </section>  
+        {% else %}
+            <p>No hay transacciones en la mempool</p>
+        {% endif %}
+
+    </div>
+</div>
+
+  
+
+{% endblock content %}

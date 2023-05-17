@@ -1,0 +1,54 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Iniciar Proceso Electoral</h1>
+    </div>
+
+    <div class="col-md-6 offset-md-3 mt-5">
+        {% if user.is_authenticated and user_in_group_and_has_permission %}
+            <p>El usuario {{ user.username }} se ha autenticado</p>
+            
+            <form action="{% url 'start_commissions' %}" method="post" class="card card-body">
+                {% csrf_token %}
+
+                <fieldset>
+                    {% if error %}
+                        <p><strong>{{ error }}</strong></p>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="creator">Creado por:</label>
+                        <input type="text" name="creator" id="creator" class="form-control" value="{{ user.username }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title">Titulo para las elecciones:</label>
+                        <input type="text" name="title" id="title" class="form-control" placeholder="Ingrese el título para estas elecciones" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description">Descripción del proceso electoral:</label>
+                        <input type="text" name="description" id="description" class="form-control" placeholder="Ingrese una descripción" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="initial_date">Fecha de inicio:</label>
+                        <input type="date" name="initial_date" id="initial_date" class="form-control" required>
+                        <label for="initial_hour">Hora de inicio:</label>
+                        <input type="time" name="initial_hour" id="initial_hour" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="final_date">Fecha de cierre:</label>
+                        <input type="date" name="final_date" id="final_date" class="form-control" required>
+                        <label for="final_hour">Hora de cierre:</label>
+                        <input type="time" name="final_hour" id="final_hour" class="form-control" required>
+                    </div>
+
+                </fieldset>
+                <input type="submit" value="Agendar/Iniciar Proceso" class="btn btn-primary">
+            </form>
+
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}
