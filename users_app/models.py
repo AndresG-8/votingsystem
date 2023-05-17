@@ -21,8 +21,8 @@ class UserDetail(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     id_user = models.CharField(max_length=100, unique=True)
-    private_key = models.CharField(max_length=500)
-    public_key = models.CharField(max_length=500)
+    private_key = models.TextField()
+    public_key = models.TextField()
     active = models.BooleanField(default=True)
     first_login = models.DateTimeField(null=True, blank=True)
     vote = models.IntegerField(default=1) #si es 1 es que no se ha gastado su voto

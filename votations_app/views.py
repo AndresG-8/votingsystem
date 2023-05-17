@@ -17,7 +17,7 @@ from django.http import JsonResponse
 from .models import Votation
 from blockchain_app.models import Transaction
 from blockchain_app.views import Blockchain
-from users_app.models import UserDetail, UserProfile
+from users_app.models import UserDetail
 from users_app.views import UserActions
 from mempool_app.views import Mempool
 from nodes_app.views import Nodes
@@ -113,24 +113,19 @@ def vote_page(request, commission_id):
         commission_id = request.POST['commission_id']
         candidate_id = request.POST['candidate_id']
 
-        # candidate_voted = UserProfile.objects.get(pk=candidate_id)
-        
-        print(commission_id, candidate_id)
-
-        print(f'votante: {request.user.id} - name: {request.user.username}')
-
-        user_actions = UserActions()
         #cuando el usuario vota, el usuario debe es encriptar sus datos y retornar la transacción encriptada y firmada
+        user_actions = UserActions()
+        #retorna un JsonREsponse con los datos o con error
         vote_response = user_actions.voter_vote(request.user.id, candidate_id=candidate_id, commission_id=commission_id)
-        print(vote_response)
+        #como es un JsonResponse, se extrae el contenido y se deja como string
         json_string = vote_response.content
-        print(json_string)
+        #luego se carga el string con json.loads para que quede como diccionario        
         json_data = json.loads(json_string)
-        print(json_data)
+        #y de allí, del diccionario, se extraen los datos retornados para validación
         status = json_data['status']
         message = json_data['message']
-        print(f'status: {status}\n, message: {message}')
-        
+        print(f'views.py-127::\nstatus: {status}\nmessage: {message}')
+
         if status == 'error' or isinstance(message, str):
             messages.error(request, message)
             return render(request, 'vote.html', {
@@ -139,34 +134,34 @@ def vote_page(request, commission_id):
                 'candidates' : get_candidates(commission_id)
             })
         
-        vuser_id = message[1]
+        vuser_id = message['vuser_id']
         cuser_id = message['cuser_id']
         enc_signature = message['enc_signature']
         enc_trx = message['enc_trx']
-        print(f'status: {status}\n, message: {message}\n, vuser_id: {vuser_id}\n, cuser_id: {cuser_id}\n, enc_sig: {enc_signature}\n, enc_trx: {enc_trx}\n')
-        if status != 'ok':
-            messages.error(request, '¡Error, no se obtubo respuesta al realizar la votación!') 
+        
+        print(f'views.py-141::\nstatus: {status}\n, message: {message}\n, vuser_id: {vuser_id}\n, cuser_id: {cuser_id}\n, enc_sig: {enc_signature}\n, enc_trx: {enc_trx}\n')
         
         #se toma la firma y la transacción encriptada, se agrega a la mempool
+        #elimino el recipient id porque la transacción encriptada (voto), a la hora del conteo, solo puede ser abierta por el candidato
+        #quien tendrá que ingresar a la blockchain y revisar todas las transacciones y tomar las que se encriptaron con su clave y así realizar el conteo
         mempool = Mempool()
         mempool_trx = mempool.add_transaction(sender=vuser_id, sender_signature=enc_signature,
-                                              recipient=cuser_id, trx_data=enc_trx,
-                                              commission_id=commission_id)
-        print('Transacción para la mempool:', mempool_trx)
+                                              trx_data=enc_trx, commission_id=commission_id)
+        print('views.py-150::\nTransacción agregada a la mempool:', mempool_trx)
 
-        voter_checked = user_actions.user_has_voted_check(vote_response['vuser_id'])
-        if voter_checked['status'] == 'ok':
-            messages.error(request, '¡Error cambiando el estatus del votante!') 
+        #se actualiza el voto del votante para posterior validación y se obtiene por respuesta un JsonResponse
+        voter_checked = user_actions.user_has_voted_check(message['vuser_id'])
+        #se toma el contenido del JsonResponse y queda como string
+        checked_content = voter_checked.content
+        #se carga el string como diccionario
+        checked_data = json.loads(checked_content)
 
-        #pensamiento nocturno: no se deberia almacenar quien votó, se dice el milagro pero no el santo, solo se debería validar el usuario que vota
+        if checked_data['status'] != 'ok':
+            messages.error(request, checked_data['message']) 
+
         #repensamiento: si se debe enviar quien vota para que se haga la validación de la transacción, el minero valida el usuario, los permisos
         #y que no haya votado antes, luego de esto agrega el voto si cumple a un bloque, y allí si descarta los datos del usuario :D
 
-        #con esta información se debe agregar una transacción a la mempool
-        # mempool = Mempool()
-        # mempool_trx = mempool.add_transaction(commission_id=commission_id,sender=request.user, recipient=candidate_voted, vote=1)
-        # print(mempool, mempool_trx)
-        
         #1. Cada votante tiene una pareja de llaves pública-privada, y cada candidato también tiene una pareja de llaves pública-privada.
         #2. Cuando un votante desea emitir un voto, cifra su voto utilizando la llave pública del candidato. Además, genera un valor aleatorio, 
         # que se utilizará como prueba de que votó sin revelar por quién votó.
@@ -392,32 +387,3 @@ def get_candidates(commission_id):
     #candict = dict(zip(votations_candidates, candidates_details))
     return votations_candidates.order_by('-userdetail__is_candidate', 'userdetail__candidate_group')
 
-
-
-from django.http import HttpResponseBadRequest
-
-
-"""
-En este ejemplo, estamos obteniendo la instancia del usuario actual (request.user) y la instancia de Votation correspondiente al 
-votacion_id proporcionado. Luego, estamos obteniendo la instancia de UserVotation correspondiente al usuario y la votación en cuestión, 
-y verificando que el usuario sea un candidato en la votación mediante el campo is_candidate. Si el usuario es un candidato, estamos 
-obteniendo las propuestas del formulario (request.POST.get('propuestas')) y guardándolas en el campo proposals de la instancia de 
-UserVotation. Finalmente, estamos redirigiendo al usuario a la página de detalles de la votación.
-"""
-# def guardar_propuestas(request, votacion_id):
-#     if request.method == 'POST':
-#         user = request.user
-#         votacion = Votation.objects.get(id=votacion_id)
-#         try:
-#             user_votation = UserVotation.objects.get(user=user, votation=votacion)
-#         except UserVotation.DoesNotExist:
-#             return HttpResponseBadRequest("El usuario no está asociado a esta votación")
-#         if not user_votation.is_candidate:
-#             return HttpResponseBadRequest("El usuario no es candidato en esta votación")
-
-#         propuestas = request.POST.get('propuestas')
-#         user_votation.proposals = propuestas
-#         user_votation.save()
-#         return redirect('votacion_detalle', votacion_id=votacion_id)
-#     else:
-#         return render(request, 'formulario_propuestas.html')

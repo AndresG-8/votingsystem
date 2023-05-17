@@ -117,7 +117,7 @@ class Blockchain:
         return block.index
     
     @staticmethod
-    def hash(self, data):
+    def hash(data):
         """
         Hashea el dato/bloque recibido. Primero lo pasa a JSON, codifica en bytes y luego lo hashea
         """
@@ -213,97 +213,3 @@ class Blockchain:
     #         self.chain = longest_chain
     #         return True
     #     return False  
-
-class KeyGeneration():
-    """
-    Esta clase no se exporta ni se muestra a nadie, queda dentro de la lógica interna del nodo 
-    y se lanza automáticamente cuando el nodo es invocado
-    """
-    def __init__(self) -> None:
-        pass
-
-    def generate(self, pk, username, user_id, vote):
-        #concatenar los valores en una cadena
-        data = f"{pk}{user_id}{username}{vote}"
-        
-        private_key, public_key = self.deterministic_rsa_key_generation(data)
-
-        # Exportar las claves privada y pública
-        secret_code = "info_to_save_in_dot_pem"
-        private_pem = private_key.export_key(passphrase=secret_code)
-        public_pem = public_key.export_key()
-
-        return (private_pem, public_pem)        
-
-    def deterministic_rsa_key_generation(self, data):
-        # Asegurar que la generación de claves siempre genere el mismo resultado
-        private_key_salt = hashlib.sha256(data.encode()).digest()
-
-        # Generar un entero pseudoaleatorio basado en el 'private_key_salt'
-        key_size = 2048
-        exponent = 65537
-        deterministic_rng = int.from_bytes(private_key_salt, byteorder='big') % (1 << (key_size - 1))
-
-        # Generar la clave privada basada en el entero pseudoaleatorio
-        try:
-            private_key = RSA.construct((deterministic_rng, exponent))
-        except ValueError:
-            return self.deterministic_rsa_key_generation(data + "0")
-
-        # Generar la clave pública correspondiente
-        public_key = private_key.publickey()
-
-        return private_key, public_key
-    
-    def encrypt(self, to_encript, key_to_encrypt):
-        """
-        Cifrado de información. Recibe la cadena de datos a cifrar y la llave pública
-        """
-        # Trabajamos con bytes, codificamos la cadena.
-        bin_data = to_encript.encode('utf-8')
-
-        # Leemos el archivo con la clave publica
-        # with open("public.pem", "rb") as f:
-        #     recipient_key = f.read()
-
-        print('bin data: ',bin_data)
-        print('key to encrypt: ', key_to_encrypt)
-
-        # Cargamos la clave pública (instancia de clase RSA)
-        key = RSA.importKey(key_to_encrypt)
-
-        # Instancia del cifrador asimétrico
-        cipher_rsa = PKCS1_OAEP.new(key)
-
-        # Encriptamos la cadena usando la clave pública
-        enc_data = cipher_rsa.encrypt(bin_data)
-
-        print('datos encriptados:', enc_data)
-        # b'l;\xc7\x96
-
-        return enc_data
-    
-    def decrypt(self, key_to_encrypt, to_decrypt):
-        """
-        Descifrado. Recibe la llave privada para poder descifrar correctamente y la data a descifrar
-        """
-        # Leemos el archivo con la clave privada
-        # with open("private.pem", "rb") as f:
-        #     recipient_key = f.read()
-
-        # Cargamos la clave privada (instancia de clase RSA)
-        key = RSA.importKey(key_to_encrypt, passphrase="info_to_save_in_dot_pem")
-
-        # Instancia del cifrador asimétrico
-        cipher_rsa = PKCS1_OAEP.new(key)
-
-        # Desencriptamos la cadena usando la clave privada
-        dec_data = cipher_rsa.decrypt(to_decrypt)
-
-        # Decodificamos la cadena
-        cadena = dec_data.decode("utf-8")
-
-        print(cadena)
-        # "Hola StackOverflow en español"
-
-        return cadena

@@ -12,12 +12,14 @@ from django.contrib.auth.decorators import login_required
 
 from django.db import IntegrityError
 
-from blockchain_app.views import Blockchain, KeyGeneration
+from blockchain_app.views import Blockchain
 #importación para el formulario
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 import base64
 import json
+
+import blockchain_app.keys as keys
 
 def signin(request):
     if request.method == 'GET':
@@ -181,17 +183,20 @@ class UserActions:
         except UserProfile.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'El candidato no existe en la base de datos.'})
 
-        #usar la clase KeyGeneration de la blockchain para cifrar y descifrar
-        keygen = KeyGeneration()
         #crear la transacción que se enviará al candidato
-        trx_to_encrypt = "{'commission_id':f'{commission_id}', 'vote':'1'}"
-        print(trx_to_encrypt)
+        trx_to_encrypt = "{'commission_id':'"+commission_id+"', 'vote':'1'}"
         #se encripta la transacción con la llave pública del candidato seleccionado
-        encypted_trx = keygen.encrypt(trx_to_encrypt, candidate_profile.public_key)
+        cp_puk = candidate_profile.public_key
+        #retorna bytes y se guarda tal cual. Verificar si es buena idea dejarlo en bytes o cambiarlo a string para guardarlo
+        encypted_trx = keys.encrypt_with_public_key(cp_puk, trx_to_encrypt)
         
-        #se crea la firma con base al user_id para firmar la transacción, la firma se debe encriptar con la llave privada del votante
+        #se crea la firma con base al user_id para firmar la transacción
         signature = Blockchain.hash(voter_profile.user_id)
-        encrypted_signature = keygen.encrypt(signature, voter_profile.private_key)
+        #la firma se debe encriptar con la llave privada del votante
+        # encrypted_signature = keys.encrypt_with_public_key(signature, voter_profile.private_key) 
+        vp_prk = voter_profile.private_key
+        encrypted_signature = keys.encrypt_with_private_key(vp_prk, signature, "se_podria_cambiar")
+        # encrypted_signature = keygen.encrypt(signature, voter_profile.private_key)
 
         #se crea un diccionario que luego se pasa a json y esto es lo que se retorna
         data_to_return = {'status': 'ok', 
@@ -212,7 +217,7 @@ class UserActions:
         Indica que el usuario ha votado
         """
         try:
-            userp = UserProfile.objects.get(user_id=user_id)
+            userp = UserProfile.objects.get(id_user=user_id)
         except UserProfile.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'El candidato no existe en la base de datos.'})
         

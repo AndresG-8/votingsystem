@@ -49,3 +49,10 @@ REGLAS
 * el resto de usuarios también deben loguearse en pro de tener claves para el cifrado.
 * los nodos, a pesar de ser usuarios, no estan habilitados para votar, por lo que sus claves se manejan a parte
 * 
+
+
+importante
+línea 190 de views.py de users_app. Allí se encriptan las transacciones y se guardan, validar si es mejor decodificarlas y guardarlas así 
+decodificadas
+
+
