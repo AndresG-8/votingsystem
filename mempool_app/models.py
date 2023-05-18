@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
    
 class MempoolTransaction(models.Model):
-    # Campos de la tabla de transacciones (ya minados, es decir, que ya pasaron por la mempool)
+    # Campos de la tabla de transacciones sin minar
     sender = models.CharField(max_length=100) #quien envia la transacción, se envia el user_id para que el nodo pueda validar la firma
     sender_signature = models.CharField(max_length=500) #la firma es un hash encriptado con la llave privada del votante y que se descifra con la llave pública
     trx_data = models.CharField(max_length=500) #acá se almacena la información encriptada que se envia en la transacción al candidato

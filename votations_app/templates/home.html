@@ -22,7 +22,7 @@
 
         {% if user.is_authenticated %}
             <section class="card card-body">
-                <p>Buenas tardes, {{ user.username|capfirst }}. Estas son las opciones disponibles según el grupo asignado</p>
+                <p>Buen día, {{ user.username|capfirst }}. Estas son las opciones disponibles según el grupo asignado</p>
 
                 {% if user_in_group.admins %}
                     <div class="text-center mt-2">
@@ -96,10 +96,9 @@
                     </div>
                 
                 {% else %}
-                <div class="text-center">
-                    <p><strong>No estas registrado en ningún grupo, no tienes opciones disponibles</strong></p>
-                </div>
-                
+                    <div class="text-center">
+                        <p><strong>No estas registrado en ningún grupo, no tienes opciones disponibles</strong></p>
+                    </div>
                 {% endif %}
             </section>
         {% else %}

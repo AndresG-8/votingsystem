@@ -47,11 +47,14 @@ class Blockchain:
         #al crear el bloque, se liga de una vez a la cadena de bloques que recien se creó.
         block = self.create_block(nonce=1, previous_hash='0')
         
-        print('información del bloque después de la creación: ', block)
+        print('blockchain_app.views.py-50::información del bloque después de la creación: ', block)
 
         """Crear transacción génesis"""
         #al agregar la transacción se retorna el número del bloque al cual será agregado, como esto es genesis, no es tan necesario
-        trx = self.add_transaction(sender=user, recipient=user, vote=1, block=block)
+        sender_signature = 'que buena pregunta' # (¿encriptar admin que crea transacción?)
+        trx_data = 'Transacción en el bloque génesis'
+        node_id = 'administrador' + user.username
+        trx = self.add_transaction(sender=user, sender_signature=sender_signature, trx_data=trx_data, node_id=node_id, block=block)
 
         """Actualizar el hash al bloque creado con base en la info del bloque y los ids de las transacciones"""
         #se obtienen todas las transacciones del bloque
@@ -82,7 +85,7 @@ class Blockchain:
             )
         #algo importante por acá, los nodos si deberían tener firma, por ende cuando se cree un bloque, se debería firmar por un nodo, o no?
         block.save()
-        print('bloque creado')
+        print(f'blockchain_app.views.py-85::\nBloque {block.index} creado')
         return block
     
     def get_last_index_block(self):
@@ -108,11 +111,11 @@ class Blockchain:
 
         return block
     
-    def add_transaction(self, sender, recipient, vote, block):
+    def add_transaction(self, sender, sender_signature, trx_data, node_id, block):
         """
-        Agrega una transacción a la cadena de bloques y retorna el bloque en el cual será asignada
+        Agrega una transacción a la cadena de bloques y retorna el bloque en el cual se asigna (el retorno acá no es muy diciente)
         """
-        transaction = Transaction.objects.create(sender=sender, recipient=recipient, vote=vote, block=block)
+        transaction = Transaction.objects.create(sender=sender, sender_signature=sender_signature, trx_data=trx_data, node_id=node_id, block=block)
         transaction.save()
         return block.index
     

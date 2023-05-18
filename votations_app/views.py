@@ -15,23 +15,26 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 
 from .models import Votation
+
 from blockchain_app.models import Transaction
 from blockchain_app.views import Blockchain
-from users_app.models import UserDetail
+
 from users_app.views import UserActions
+from users_app.models import UserDetail
+
 from mempool_app.views import Mempool
+
 from nodes_app.views import Nodes
 from nodes_app.models import Node
 
-from uuid import uuid4
+# from uuid import uuid4
 import json
 
 def home(request):
     #se obtiene un listado de las últimas 20 transacciones registradas sin importar de donde son
     latest_transactions_list = Transaction.objects.select_related('block').all().order_by('-id')[:20]
     
-    mempool = Mempool()
-    latest_mempool_trx = mempool.get_mempool_transactions(quantity=20)
+    latest_mempool_trx = Mempool.get_mempool_transactions(quantity=20)
     #obtener los detalles del usuario, si es que está autenticado
     user_detail = None
     if request.user.is_authenticated:
@@ -44,8 +47,8 @@ def home(request):
     return render(request, 'home.html', {
         'latest_transactions_list' : latest_transactions_list,
         'user_in_group': user_in_group(request.user),
-        'active_commissions': active_commissions,
-        'candidate' : request.user, #acá si es un candidato, se debe enviar su información -> creo que esto sobra porque el request ya tiene los datos del usuario
+        'active_commissions': active_commissions, #este metodo local se podíra quitar y dejar solo Votation.get_active_votations()
+        'candidate' : request.user,
         'user_detail' : user_detail,
         'latest_mempool_trx': latest_mempool_trx
     })
@@ -202,13 +205,11 @@ def add_node(request):
     users = users.values('id', 'username')
     users_list = list(users)
 
-    register_nodes = Node.objects.filter(active=True)
-
     if request.method == 'GET':
         return render(request, 'add_node.html', {
             'user_in_group': user_in_group(request.user),
             'users': users_list,
-            'register_nodes':register_nodes
+            'register_nodes': Nodes.get_nodes()
         })
     elif request.method == 'POST':
         node_user = User.objects.get(id=request.POST['user_node'])
@@ -217,21 +218,19 @@ def add_node(request):
         location = request.POST['location'] #ubicación física del nodo
         processing_capacity = request.POST['processing_capacity'] #capacidad de procesamiento del nodo
         
-        node = Nodes()
-        created_node = node.create_node(ip_address=ip_address, net_address=net_address, location=location
+        created_node = Nodes.create_node(ip_address=ip_address, net_address=net_address, location=location
                                  ,processing_capacity=processing_capacity, user=node_user)
 
         messages.success(request, '¡Se ha agregado el nodo correctamente! El nodo se registró con el id: ' + created_node.node_id)
         return render(request, 'add_node.html', {
             'user_in_group': user_in_group(request.user),
             'users': users_list,
-            'register_nodes':register_nodes
+            'register_nodes': Nodes.get_nodes()
         })
 
 @login_required
 def update_node(request):
     #se toma la info del usuario que realiza la petición y se busca cual es el nodo creado por el admin
-    #
     user = User.objects.get(pk=request.user.id)
     node = user.node
 
@@ -246,19 +245,28 @@ def update_node(request):
         processing_capacity = request.POST['processing_capacity'] 
         password =  request.POST['password'] 
        
-        node_method = Nodes()
-        updated_node = node_method.update_node(user=user, node=node, net_address=net_address, location=location
+        # node_method = Nodes()
+        updated_node = Nodes.update_node(user=user, node=node, net_address=net_address, location=location
                                         ,processing_capacity=processing_capacity, password=password)
+        
+        up_string = updated_node.content #se obtiene el contenido del json
+        up_data = json.loads(up_string) #se pasa a un diccionario
+        if up_data['status'] != 'ok':
+            messages.success(request, up_data['message'])
+            return render(request, 'update_node.html', {
+                'user_in_group': user_in_group(request.user),
+                'node': node
+            })    
+        
         messages.success(request, '¡Se ha actualizado el nodo correctamente!')
         return redirect('home')
 
 @login_required
 def view_nodes(request):
-    #retorna una view con una lista de los nodos registrados
-    register_nodes = Node.objects.filter(active=True)
+    #retorna una view con una lista de los nodos registrados 
     return render(request, 'view_nodes.html', {
         'user_in_group': user_in_group(request.user),
-        'register_nodes':register_nodes
+        'register_nodes': Nodes.get_nodes()
     })
 
 @login_required
@@ -276,62 +284,30 @@ def get_trxs(request):
         return redirect('home')
     elif request.method == 'POST':
         commission_id = request.POST['commission_id']
-        commission = get_object_or_404(Votation, pk=commission_id)
-        print(f'elección: {commission}')
-        #debe tomar las transacciones disponibles de la mempool que son de la votación seleccionada
-        node = Node.objects.get(pk=request.user.id)
-        #el minero crea un bloque temporal y a este bloque temporal es al que le agrega todas las transacciones
-        #si ya se valida el bloque, ahí si se le pasa a la cadena real y se liga el bloque a la cadena de bloques
-        #por temas de agilidad, se crea el bloque directamente en al cadena y allí se le agregan las transacciones
-
-        # TODO ESTO LO DEBERÍA HACER EL MINERO, SE PONE ACÁ POR FACILIDAD. PERO ES UNA FUNCION LLAMADA "MINAR"
-        mempool = Mempool()
-        #nota: quitar la cantidad de acá para que queden por defecto
-        print(f'related_vot: {commission_id}')
-        mempool_trx = mempool.get_related_mem_trx(related_votation=commission_id,  quantity=2)
-        print(mempool_trx)
-        if not mempool_trx.exists():
-            messages.info(request, '¡No hay transacciones que puedan ser minadas para la votación seleccionada!')
-            return redirect('home')
-        #una vez se han seleccionado las transacciones, se bloquean y se les asigna el nodo_id
-        for memtrx in mempool_trx:
-            mempool.update_status(memtrx.id, node.node_id)
-
-        #crear el objeto blockchain con la información de la comision
-        blockchain = Blockchain(commission_id)
-        #obtener el último bloque de la cadena
-        last_block = blockchain.get_last_block()
-        print(f'bloque anterior: {last_block}')
-        #hacer prueba de trabajo, se le envia el nonce del bloque anterior -> la prueba de trabajo deben ser las validaciones de autenticidad
-        new_nonce = blockchain.proof_of_work(previous_nonce=last_block.nonce)
-        print(f'nuevo nonce: {new_nonce}')
-        #hashear las transacciones de la mempool (deberían ser las transacciones reales?) para agregarlas a la data
-        data_hashed = blockchain.hash_data(mempool_trx)
-        #crear el bloque, esto me retorna el bloque recien creado ->al crear el objeto se liga la cadena al objeto que se esta creando acá
-        new_block = blockchain.create_block(nonce=new_nonce, previous_hash=last_block.previous_hash, data=data_hashed)
-        print(f'nuevo bloque: {new_block}')
-        #una vez creado el bloque, se le agregan las transacciones
-        for trx in mempool_trx:
-            trx_in_block = blockchain.add_transaction(sender=trx.sender, recipient=trx.recipient, vote=trx.vote, block=new_block)
-            print(f'La transacción {trx.id} se agregó al bloque {trx_in_block} o -> {new_block.index}')
-            mempool.delete_trx(trx_id=trx.id)
+        ###### NEW 
+        mine = Nodes.mine(request.user.user_id, commission_id, 2) #la cantidad se puede modificar, sacarlo a un setting o parámetros en algún lado
         
-        #y como ya este nodo creo el bloque, se eliminan de la mempool
-        #mempool.delete_trxs(related_votation=commission_id, node_id=node.node_id)
+        mine_string = mine.content
+        mine_data = json.loads(mine_string)
+        status = mine_data['status']
+        message = mine_data['message']
+        if status != 'ok':
+            messages.success(request, message)
+            return redirect('home')
+
+        messages.success(request, message)
+        return redirect('home')
+        #hasta acá llega la función 
+
+        #Durante la prueba de trabajo o validación se verifica que
+        #si se pueda crear el bloque, la transacción sigue en la mempool y como esta bloqueada, ps nadie mas la toma
+        #de esta manera se garantiza que este libre solo para el que ya la tomó
 
         #luego de que en la mempool hayan suficientes transacciones, 
         #se le asigna a un nodo o el nodo la toma, y las agrega a un bloque
         #luego que se agrega y se valida el bloque, se agrega a la cadena
         #luego el nodo debería validar la blockchain(?)
 
-        messages.success(request, '¡Se ha minado correctamente el bloque!')
-        return redirect('home')
-        #acá se retorna el la notificación del minado correcto y se muestra lo que se ha minado
-        # return render(request, 'home.html', {
-        #     'user_in_group': user_in_group(request.user),
-        #     'commission' : commission,
-        #     'new_block' : new_block
-        # })
 
 def user_in_group_and_has_permission(user):
     # if user.groups.filter(name="grupo_especifico").exists() and user.has_perm('app_name.permiso_necesario'):

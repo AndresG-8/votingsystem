@@ -21,8 +21,8 @@ class Mempool:
         se debe quitar el bloqueo para que se asigne a otro minero, si se quita el bloqueo de una trx se debe cancelar el bloque
         que el minero al que se le quito la transacción tiene"""
         
-    
-    def add_transaction(self, sender, sender_signature, trx_data, commission_id):
+    @staticmethod
+    def add_transaction(sender, sender_signature, trx_data, commission_id):
         """
         Agrega una transacción a la mempool, retorna la transacción en sí
         """
@@ -30,7 +30,8 @@ class Mempool:
         transaction.save()
         return transaction
     
-    def get_mempool_transactions(self, quantity=None, taken=False):
+    @staticmethod
+    def get_mempool_transactions(quantity=None, taken=False):
         """
         Obtiene transacciones y las retorna en el queryset
         """
@@ -38,21 +39,30 @@ class Mempool:
             return MempoolTransaction.objects.filter(is_taken=taken).order_by('-id')[:quantity]
         else:
             return MempoolTransaction.objects.filter(is_taken=taken).order_by('-id')
-        
-    def get_related_mem_trx(self, related_votation,  quantity=10, taken=False):
+    
+    @staticmethod
+    def get_related_mem_trx(related_votation, quantity=10, taken=False):
         """Se retornan todas las transacciones de una votación específica y por defecto solo 10 transacciones que no esten tomadas ya"""
         return MempoolTransaction.objects.filter(is_taken=taken, related_votation=related_votation).order_by('-id')[:quantity]
 
-    def update_status(self, mem_trx_id, node_id):
+    @staticmethod
+    def get_taken_trx(related_votation, node_id, quantity=10):
+        """Recibe el id del nodo y retorna las transacciones que dicho nodo tiene tomadas"""
+        return MempoolTransaction.objects.filter(is_taken=True, related_votation=related_votation, node_id=node_id).order_by('-id')[:quantity]
+
+    @staticmethod
+    def update_status(mem_trx_id, node_id):
         mempool_trx = MempoolTransaction.objects.get(id=mem_trx_id)
         mempool_trx.node_id = node_id
         mempool_trx.is_taken = True
         mempool_trx.save()
         return True
     
-    def delete_trxs(self, related_votation, node_id):
+    @staticmethod
+    def delete_trxs(related_votation, node_id):
         MempoolTransaction.objects.filter(is_taken=True, related_votation=related_votation, node_id=node_id).delete()
 
-    def delete_trx(self, trx_id):
+    @staticmethod
+    def delete_trx(trx_id):
         MempoolTransaction.objects.get(id=trx_id).delete()
 
