@@ -32,6 +32,26 @@
                     <div class="text-center mt-2">
                         <a href="{% url 'add_node' %}" class="btn btn-primary">Agregar un nodo</a>
                     </div>
+
+                    <p>
+                        El conteo de votos se puede realizar en cualquier momento, ya que esto recuenta TODAS las transacciones y agrega 
+                        los votos que logre encontrar del candidato.
+                        Se puede realizar el conteo de votos durante las elecciones o al terminar. Esto dependerá del modelo a usar.
+                    </p>
+                    
+                    <ul class="list-group">
+                        {% for active_commission in active_commissions %}
+                            <li class="list-group-item">
+                                <div class="text-center mt-2 mb-1">
+                                    <form action="{% url 'count_votes' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="text" hidden id="commission_id" name="commission_id" value="{{ active_commission.id }}">
+                                        <button class="btn btn-secondary">Tomar transacciones de {{active_commission.title}}</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>        
                     
                 {% elif user_in_group.candidates %}
                     <p>Candidatos</p>
@@ -147,18 +167,19 @@
                     </li>
                 {% endfor %}
             </ul>            
-        {% endif %}
+       
 
-        {% if latest_mempool_trx %}
-            <section class="card card-body">
-                {% for trx in latest_mempool_trx %}
-                    <ul class="list-group">
-                        <li class="list-group-item">Mempool Tran: {{ trx.id }} - {{ trx }}</li>
-                    </ul>
-                {% endfor %}    
-            </section>  
-        {% else %}
-            <p>No hay transacciones en la mempool</p>
+            {% if latest_mempool_trx %}
+                <section class="card card-body">
+                    {% for trx in latest_mempool_trx %}
+                        <ul class="list-group">
+                            <li class="list-group-item">Mempool Tran: {{ trx.id }} - {{ trx }}</li>
+                        </ul>
+                    {% endfor %}    
+                </section>  
+            {% else %}
+                <p>No hay transacciones en la mempool</p>
+            {% endif %}
         {% endif %}
 
     </div>

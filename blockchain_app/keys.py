@@ -5,6 +5,7 @@ from Crypto.Random import get_random_bytes
 import base64
 import hashlib
 from Crypto import Random
+from django.http import JsonResponse
 
 @staticmethod
 def encrypt_with_public_key(public_key_pem, message):
@@ -20,16 +21,29 @@ def encrypt_with_public_key(public_key_pem, message):
     return base64.b64encode(encrypted_message)  # Devuelve el mensaje cifrado como una cadena base64
 
 def decrypt_with_private_key(private_key_pem, encrypted_message, passphrase):
-    # Importar la clave privada
-    private_key = RSA.import_key(private_key_pem, passphrase=passphrase)
+    try:
+        # Importar la clave privada
+        private_key = RSA.import_key(private_key_pem, passphrase=passphrase)
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'status':'error', 'message':'Error al importar la clave privada: '+str(e) })
 
-    # Crear un objeto de descifrado
-    cipher = PKCS1_OAEP.new(private_key)
-    
-    # Descifrar el mensaje
-    decrypted_message = cipher.decrypt(base64.b64decode(encrypted_message))
+    try:
+        # Crear un objeto de descifrado
+        cipher = PKCS1_OAEP.new(private_key)
+    except ValueError as e:
+        return JsonResponse({'status':'error', 'message':'Error al crear el objeto de descifrado: ' + str(e)})
+        
+    try:
+        # Descifrar el mensaje
+        decrypted_message = cipher.decrypt(base64.b64decode(encrypted_message))
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'status':'error', 'message':'Error al descifrar el mensaje: ' + str(e)})
 
-    return decrypted_message.decode()  # Devuelve el mensaje descifrado como una cadena
+    try:
+        # Devolver el mensaje descifrado # Devuelve el mensaje descifrado como una cadena
+        return JsonResponse({'status':'ok', 'message':decrypted_message.decode()})
+    except UnicodeDecodeError as e:
+        return JsonResponse({'status':'error', 'message':'Error al decodificar el mensaje descifrado: ' + str(e)})
 
 def encrypt_with_private_key(private_key_pem, message, passphrase):
     # Importar la clave privada

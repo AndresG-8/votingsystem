@@ -11,6 +11,7 @@ urlpatterns = [
     path('view_nodes/', views.view_nodes, name='view_nodes'),
     path('vote/<int:commission_id>/', views.vote_page, name='vote'),
     path('get_trxs/', views.get_trxs, name='get_trxs'),
+    path('count_votes/', views.count_votes, name='count_votes'),
 ]
 
 if settings.DEBUG:

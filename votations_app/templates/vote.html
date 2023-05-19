@@ -46,7 +46,7 @@
                                     
                                     <p class="card-text">votations_voters: {{ candidate.userdetail }}</p>
                                     
-                                    {% if candidate.userdetail.is_candidate %}
+                                    {% if candidate.userdetail.is_candidate and user_profile.vote == 1 %}
                                         <form action="{% url 'vote' commission.id %}" method="POST">
                                             {% csrf_token %}
                                             <input type="text" hidden id="commission_id" name="commission_id" value="{{ commission.id }}">

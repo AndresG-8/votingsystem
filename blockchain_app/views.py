@@ -75,7 +75,7 @@ class Blockchain:
     def create_block(self, nonce, previous_hash, data):
         """Crea un bloque de acuerdo a los datos recibidos"""
         #se crea el bloque con la información que se recibe
-        print('va a crear el bloque')
+        print('blockchain_app.views.py-78::\nVa a crear el bloque')
         block = Block.objects.create(
             index = self.get_last_index_block()+1,
             nonce = nonce,

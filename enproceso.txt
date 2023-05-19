@@ -3,29 +3,29 @@ Funcionamiento de las votaciones:
     ● Selecciona el botón para crear nuevo proceso electoral
     ● Crea el nuevo proceso electoral ingresando los datos básicos 
     ● Al crear el proceso electoral, se deben asociar los usuarios candidatos
-    ● -Todos los demás usuarios en la plataforma deben tener un estado de activo o inactivo para validar si se le permite el ingreso y uso de la 
+    ● Todos los demás usuarios en la plataforma deben tener un estado de activo o inactivo para validar si se le permite el ingreso y uso de la 
     plataforma 
     ● También se deben agregar los usuarios elegidos como candidatos al grupo de candidatos y, con el resto de usuarios al grupo de votantes 
     ● -Se debería separar usuarios de planta con usuarios habilitados para votar
-    ● -Los candidatos también pueden votar en las elecciones, por ende, tienen todo lo que tendría un votante
+    ● Los candidatos también pueden votar en las elecciones, por ende, tienen todo lo que tendría un votante
     ● -Una vez se registran los candidatos, se debe enviar correo informandole al candidato qué se ha registrado como tal, y que debe ingresar a 
     la plataforma para terminar de diligenciar los datos
-    ●->En la plataforma se debe desplegar información del perfil, para completar con foto, detalles del usuario y propuestas. 
-    ●->Las propuestas del candidato se guardan en json
-    ●->La información que guarde el candidato sobre sus propuestas se almacena y se despliega posteriormente en la vista de los votantes
+    ● En la plataforma se debe desplegar información del perfil, para completar con foto, detalles del usuario y propuestas. 
+    ● Las propuestas del candidato se guardan en json
+    ● La información que guarde el candidato sobre sus propuestas se almacena y se despliega posteriormente en la vista de los votantes
     ●(extra) qué los administradores validen la información del perfil subido por los candidatos antes de presentarla a los votantes, esto se 
     hace mediante un check en User details informando si es valido o no.
     ● Una vez el candidato termine de guardar la información, y se habiliten las elecciones
-    ●->El votante podrá ingresar a la plataforma y allí seleccionar el candidato de su elección, cuando lo selecciones se abrirá un modal en
+    ●<->El votante podrá ingresar a la plataforma y allí seleccionar el candidato de su elección, cuando lo selecciones se abrirá un modal en
     donde tendrá mayor detalle del candidato y sus propuestas
-    ●->En este modal se habilitará la opción de votar por el candidato y una ventana de confirmación luego del voto 
-    ● -Apenas se realice el voto, se dará un recibo de voto informando que se ha realizado con éxito 
+    ●<->En este modal se habilitará la opción de votar por el candidato y una ventana de confirmación luego del voto 
+    ●<->Apenas se realice el voto, se dará un recibo de voto informando que se ha realizado con éxito 
     ●Y ya el votante no podrá volver a votar (aunque se debería dejar habilitada la opción de votar de nuevo, ya que podría votar cuantas veces 
     sea, solo que el último voto es el que cuenta)
-    ●El voto es anónimo, por lo que no se debería guardar información del usuario qué envía la transacción sino de su intermediario
+    ● El voto es anónimo, por lo que no se debería guardar información del usuario qué envía la transacción sino de su intermediario
     ●El intermediario podría ser una wallet o un Id creado mediante hash de su usuario, correo y clave y que sería único 
     ●Así mismo para el candidato qué recibe, para asegurar que el voto le llegue, el voto se hace a su clave publica firmada por el votante y 
-    cuando le llegue el voto.
+    cuando le llegue el voto se descifra con la clave privada.
 
 donde votingsystem
 voy en la parte de vote.html en donde se define el formulario con el voto 
@@ -34,13 +34,12 @@ en el home de votingsystem en la seccion del candidato, se le agregan los datos 
 se le debe mejorar la visual de los datos, también darle la opción de que vaya a votar
 si no ha votado
 
-->agregar permiso para que los candidatos también voten en la página de vote
-->poner las transacciones de la mempool en los nodos
+-> agregar permiso para que los candidatos también voten en la página de vote
+-> poner las transacciones de la mempool en los nodos
 
-ya mina transacciones desde la vista de votación, lo ideal esque fuese desde la vista del minero para qeu sea este quien "mine"
+* ya mina transacciones desde la vista de votación, lo ideal esque fuese desde la vista del minero para qeu sea este quien "mine"
 las transaccion, también en el nodo se debería hacer la prueba de trabajo o cambiarla al otro metodo, y allí se debería hacer la validación
 de las firmas de los votantes y los otros nodos validar la firma del nodo lider que crea la transaccion, en caso de que se aplique ese metodo
-
 
 
 REGLAS

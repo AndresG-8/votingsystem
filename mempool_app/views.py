@@ -43,12 +43,12 @@ class Mempool:
     @staticmethod
     def get_related_mem_trx(related_votation, quantity=10, taken=False):
         """Se retornan todas las transacciones de una votación específica y por defecto solo 10 transacciones que no esten tomadas ya"""
-        return MempoolTransaction.objects.filter(is_taken=taken, related_votation=related_votation).order_by('-id')[:quantity]
+        return MempoolTransaction.objects.filter(is_taken=taken, related_votation=related_votation).order_by('id')[:quantity]
 
     @staticmethod
     def get_taken_trx(related_votation, node_id, quantity=10):
         """Recibe el id del nodo y retorna las transacciones que dicho nodo tiene tomadas"""
-        return MempoolTransaction.objects.filter(is_taken=True, related_votation=related_votation, node_id=node_id).order_by('-id')[:quantity]
+        return MempoolTransaction.objects.filter(is_taken=True, related_votation=related_votation, node_id=node_id).order_by('id')[:quantity]
 
     @staticmethod
     def update_status(mem_trx_id, node_id):

@@ -188,19 +188,20 @@ class UserActions:
         cp_puk = candidate_profile.public_key
         #retorna bytes y se guarda tal cual. Verificar si es buena idea dejarlo en bytes o cambiarlo a string para guardarlo
         encypted_trx = keys.encrypt_with_public_key(cp_puk, trx_to_encrypt)
-        
+        #decodificar a string antes de enviar
+        str_encypted_trx = encypted_trx.decode('utf-8')
         #se crea la firma con base al user_id para firmar la transacción
         signature = Blockchain.hash(voter_profile.user_id)
         #la firma se debe encriptar con la llave privada del votante
         # encrypted_signature = keys.encrypt_with_public_key(signature, voter_profile.private_key) 
         vp_prk = voter_profile.private_key
         encrypted_signature = keys.encrypt_with_private_key(vp_prk, signature, "se_podria_cambiar")
-        # encrypted_signature = keygen.encrypt(signature, voter_profile.private_key)
+        str_encrypted_signature = encrypted_signature.decode()
 
         #se crea un diccionario que luego se pasa a json y esto es lo que se retorna
         data_to_return = {'status': 'ok', 
                           'message': {'vuser_id': f'{voter_profile.id_user}', 'cuser_id':f'{candidate_profile.id_user}', 
-                          'enc_signature':f'{encrypted_signature}', 'enc_trx':f'{encypted_trx}'}
+                          'enc_signature':f'{str_encrypted_signature}', 'enc_trx':f'{str_encypted_trx}'}
                           }
 
         return JsonResponse(data_to_return)
@@ -225,7 +226,6 @@ class UserActions:
 
         return JsonResponse({'status': 'ok', 'message': 'Se ha cambiado el estado del votante.'})
 
-        
 
 
 

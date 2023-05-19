@@ -20,7 +20,7 @@ from blockchain_app.models import Transaction
 from blockchain_app.views import Blockchain
 
 from users_app.views import UserActions
-from users_app.models import UserDetail
+from users_app.models import UserDetail, UserProfile
 
 from mempool_app.views import Mempool
 
@@ -102,6 +102,8 @@ def start_voting_process(request):
 def vote_page(request, commission_id):
     #si llaman la página para la votación, se busca con el id cual es la votación solicitada (el id viene en la url)
     commission = get_object_or_404(Votation, pk=commission_id)
+    #validación que va a decidir si permite botón de votación o lo quita
+    user_profile = UserProfile.objects.get(user_id=request.user.id)
     #si se envia un get, es solo para mostrar la información
     if request.method == 'GET':
         #se retorna el template vote y se busca y envia a que grupo pertenece el usuario, 
@@ -109,7 +111,8 @@ def vote_page(request, commission_id):
         return render(request, 'vote.html', {
             'user_in_group': user_in_group(request.user),
             'commission' : commission,
-            'candidates' : get_candidates(commission_id)
+            'candidates' : get_candidates(commission_id),
+            'user_profile': user_profile
         })
     elif request.method == 'POST':
         #con la información enviada, se debe tomar el usuario, la votación y el voto a quien va
@@ -134,7 +137,8 @@ def vote_page(request, commission_id):
             return render(request, 'vote.html', {
                 'user_in_group': user_in_group(request.user),
                 'commission' : commission,
-                'candidates' : get_candidates(commission_id)
+                'candidates' : get_candidates(commission_id),
+                'user_profile': user_profile
             })
         
         vuser_id = message['vuser_id']
@@ -194,7 +198,8 @@ def vote_page(request, commission_id):
         return render(request, 'vote.html', {
             'user_in_group': user_in_group(request.user),
             'commission' : commission,
-            'candidates' : get_candidates(commission_id)
+            'candidates' : get_candidates(commission_id),
+            'user_profile': user_profile
         })
 
 @login_required
@@ -285,14 +290,14 @@ def get_trxs(request):
     elif request.method == 'POST':
         commission_id = request.POST['commission_id']
         ###### NEW 
-        mine = Nodes.mine(request.user.user_id, commission_id, 2) #la cantidad se puede modificar, sacarlo a un setting o parámetros en algún lado
+        mine = Nodes.mine(request.user.id, commission_id, 2) #la cantidad se puede modificar, sacarlo a un setting o parámetros en algún lado
         
         mine_string = mine.content
         mine_data = json.loads(mine_string)
         status = mine_data['status']
         message = mine_data['message']
         if status != 'ok':
-            messages.success(request, message)
+            messages.error(request, message)
             return redirect('home')
 
         messages.success(request, message)
@@ -308,6 +313,22 @@ def get_trxs(request):
         #luego que se agrega y se valida el bloque, se agrega a la cadena
         #luego el nodo debería validar la blockchain(?)
 
+def count_votes(request):
+    if request.method == 'POST':
+        commission_id = request.POST['commission_id']
+        ###### NEW 
+        # mine = Nodes.mine(request.user.id, commission_id, 2) #la cantidad se puede modificar, sacarlo a un setting o parámetros en algún lado
+        voter_counter = Nodes.count_votes(commission_id=commission_id)
+        mine_string = voter_counter.content
+        mine_data = json.loads(mine_string)
+        status = mine_data['status']
+        message = mine_data['message']
+        if status != 'ok':
+            messages.error(request, message)
+            return redirect('home')
+
+        messages.success(request, message)
+        return redirect('home')
 
 def user_in_group_and_has_permission(user):
     # if user.groups.filter(name="grupo_especifico").exists() and user.has_perm('app_name.permiso_necesario'):

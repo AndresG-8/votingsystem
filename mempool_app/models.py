@@ -19,5 +19,5 @@ class MempoolTransaction(models.Model):
 # y el nodo acá sera quien tome los bloques del minero y los agregue a la base de datos    
     
     def __str__(self):
-        return f"{self.sender} envia transacción la mempool."
+        return f"{self.sender} envia transacción a la mempool."
     
