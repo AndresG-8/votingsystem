@@ -30,6 +30,8 @@ from nodes_app.models import Node
 # from uuid import uuid4
 import json
 
+from django.db.models import Max
+
 def home(request):
     #se obtiene un listado de las últimas 20 transacciones registradas sin importar de donde son
     latest_transactions_list = Transaction.objects.select_related('block').all().order_by('-id')[:20]
@@ -51,7 +53,9 @@ def home(request):
         'candidate' : request.user,
         'user_detail' : user_detail,
         'latest_mempool_trx': latest_mempool_trx,
-        'get_upcoming_votations': Votation.get_upcoming_votations()
+        'get_upcoming_votations': Votation.get_upcoming_votations(),
+        'get_past_votations': Votation.get_past_votations(),
+        'get_all_elected_ones': get_all_elected_ones
     })
 
 @login_required
@@ -62,6 +66,7 @@ def start_voting_process(request):
 
     if request.method == 'GET':
         return render(request, 'start_commissions.html', {
+            'user_in_group': user_in_group(request.user),
             'user_in_group_and_has_permission': user_in_group_and_has_permission(request.user)
         })
     elif request.method == 'POST':
@@ -200,7 +205,6 @@ def vote_page(request, commission_id):
             'vuser_id': vuser_id
         })
     
-
 @login_required
 def add_node(request):
     # nodes_users = get_users_by_group('nodes')
@@ -383,3 +387,21 @@ def get_candidates(commission_id):
     #candict = dict(zip(votations_candidates, candidates_details))
     return votations_candidates.order_by('-userdetail__is_candidate', 'userdetail__candidate_group')
 
+def get_all_elected_ones():
+    # Obtiene todas las votaciones
+    votations = Votation.objects.all()
+    string_list = []
+    # Para cada votación, se obtienen los usuarios que son candidatos y tienen la mayor cantidad de votos recibidos
+    for votation in votations:
+        # Obtener los detalles de los usuarios que son candidatos y están asociados con la votación actual
+        candidate_user_details = UserDetail.objects.filter(user__in=votation.users.all(), is_candidate=True)
+        
+        # Si hay candidatos, obtener el que tiene la mayor cantidad de votos recibidos
+        if candidate_user_details.exists():
+            max_votes_received = candidate_user_details.aggregate(Max('votes_received'))['votes_received__max']
+            top_candidate = candidate_user_details.filter(votes_received=max_votes_received).first()
+            string_list.append(f'En la votación "{votation.title}", el candidato con la mayor cantidad de votos recibidos es {top_candidate.user.username} con {top_candidate.votes_received} votos.')
+
+    return string_list
+
+    

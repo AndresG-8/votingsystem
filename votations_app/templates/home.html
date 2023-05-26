@@ -46,7 +46,7 @@
                                     <form action="{% url 'count_votes' %}" method="POST">
                                         {% csrf_token %}
                                         <input type="text" hidden id="commission_id" name="commission_id" value="{{ active_commission.id }}">
-                                        <button class="btn btn-secondary">Tomar transacciones de {{active_commission.title}}</button>
+                                        <button class="btn btn-secondary">Realizar conteo de {{active_commission.title}}</button>
                                     </form>
                                 </div>
                             </li>
@@ -197,6 +197,34 @@
             {% else %}
                 <p>No hay transacciones en la mempool</p>
             {% endif %}
+        {% else %}
+                {% if get_past_votations %}
+                    <p>Elecciones anteriores</p>
+                    <ul class="list-group">
+                        {% for past_votation in get_past_votations %}
+                            <li class="list-group-item">
+                                <div class="text-center mt-2 mb-1">
+                                    <p><strong>{{past_votation.title}}</strong></p>
+                                    <p>{{past_votation.description}}</p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>    
+                {% endif %}
+
+                {% if get_all_elected_ones %}
+                    <h3>Elegidos</h3>
+                    <ul class="list-group">
+                        {% for elected in get_all_elected_ones %}
+                            <li class="list-group-item">
+                                <div class="text-center mt-2 mb-1">
+                                    <p><strong>{{elected}}</strong></p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>    
+                {% endif %}
+                
         {% endif %}
 
     </div>

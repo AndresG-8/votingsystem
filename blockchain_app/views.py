@@ -40,12 +40,12 @@ class Blockchain:
                      
     def create_genesis(self, votation, user):      
         """Crear cadena"""
-        chain = Chain.objects.create(votation=votation)
-        chain.save()
+        self.chain = Chain.objects.create(votation=votation)
+        self.chain.save()
 
         """Crear bloque génesis"""
         #al crear el bloque, se liga de una vez a la cadena de bloques que recien se creó.
-        block = self.create_block(nonce=1, previous_hash='0')
+        block = self.create_block(nonce=1, previous_hash='0', data='Bloque génesis')
         
         print('blockchain_app.views.py-50::información del bloque después de la creación: ', block)
 
@@ -54,7 +54,7 @@ class Blockchain:
         sender_signature = 'que buena pregunta' # (¿encriptar admin que crea transacción?)
         trx_data = 'Transacción en el bloque génesis'
         node_id = 'administrador' + user.username
-        trx = self.add_transaction(sender=user, sender_signature=sender_signature, trx_data=trx_data, node_id=node_id, block=block)
+        trx = self.add_transaction(sender=user.id, sender_signature=sender_signature, trx_data=trx_data, node_id=node_id, block=block)
 
         """Actualizar el hash al bloque creado con base en la info del bloque y los ids de las transacciones"""
         #se obtienen todas las transacciones del bloque

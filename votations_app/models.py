@@ -38,6 +38,16 @@ class Votation(models.Model):
         Obtiene las votaciones con un mes de antelación
         """
         now = timezone.now().date()
-        one_month_ago = now - timedelta(days=30)
+        one_month_later = now + timedelta(days=30)
+        upcoming_votations = cls.objects.filter(initial_date__gte=now, initial_date__lt=one_month_later)
+        return upcoming_votations
+
+    @classmethod
+    def get_past_votations(cls):
+        """
+        Obtiene las votaciones con un mes de antelación
+        """
+        now = timezone.now().date()
+        one_month_ago = now + timedelta(days=30)
         upcoming_votations = cls.objects.filter(initial_date__gte=one_month_ago, initial_date__lt=now)
         return upcoming_votations
