@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.utils import timezone
 
 class Votation(models.Model):
@@ -32,3 +32,12 @@ class Votation(models.Model):
         now = timezone.now()
         return self.initial_date <= now <= self.final_date
 
+    @classmethod
+    def get_upcoming_votations(cls):
+        """
+        Obtiene las votaciones con un mes de antelación
+        """
+        now = timezone.now().date()
+        one_month_ago = now - timedelta(days=30)
+        upcoming_votations = cls.objects.filter(initial_date__gte=one_month_ago, initial_date__lt=now)
+        return upcoming_votations

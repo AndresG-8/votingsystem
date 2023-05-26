@@ -127,6 +127,23 @@
                 <a href="{% url 'signup' %}" class="btn btn-secondary mt-2 mb-2">Registrarse</a>
             </div>
         {% endif %}
+
+        {% if get_upcoming_votations %}
+        <section class="card card-body">
+            <ul class="list-group">
+                <p><strong>Próximas elecciones</strong></p>
+                {% for votations in get_upcoming_votations %}
+                    <li class="list-group-item">
+                        <div class="text-center mt-2 mb-1">
+                            <h2>{{votations.title}}</h2>
+                            <h4>{{votations.description}}</h4>
+                            <p>{{votations.initial_date}}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>  
+        </section> 
+        {% endif %}
     
     </div>
 </div>

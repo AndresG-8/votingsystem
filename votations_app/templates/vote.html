@@ -25,7 +25,7 @@
             {% elif user_in_group.voters or user_in_group.candidates %}
                 
                 <div class="row py4">
-                    <p>Cantidad de candidatos: {{ candidates.count }}</p>
+                    
                     {% for candidate in candidates %}
                        
                         <div class="col-md-5 mt-2 ml-8">
@@ -43,8 +43,6 @@
                                         {% endfor %}
                                     </ul>
                                     {% endif %}
-                                    
-                                    <p class="card-text">votations_voters: {{ candidate.userdetail }}</p>
                                     
                                     {% if candidate.userdetail.is_candidate and user_profile.vote == 1 %}
                                         <form action="{% url 'vote' commission.id %}" method="POST">

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Documento de Usuario</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <img src="/img/favicon.ico" alt="Logo del aplicativo">
+                <h1>Documento de Usuario</h1>
+                <table class="table">
+                    <tr>
+                        <th>Usuario</th>
+                        <td>{{ usuario.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nombre de usuario</th>
+                        <td>{{ usuario.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Identificación del usuario</th>
+                        <td>{{ usuario.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Correo del usuario</th>
+                        <td>{{ usuario.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ciudad</th>
+                        {% comment %} <td>{{ ciudad|default('Ciudad por defecto') }}</td> {% endcomment %}
+                    </tr>
+                    <tr>
+                        <th>País</th>
+                        {% comment %} <td>{{ pais|default('País por defecto') }}</td> {% endcomment %}
+                    </tr>
+                    <tr>
+                        <th>ID único</th>
+                        <td>{{ usuario.unique_id }}</td>
+                    </tr>
+                </table>
+                <button onclick="window.print()" class="btn btn-primary">Imprimir o Guardar como PDF</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

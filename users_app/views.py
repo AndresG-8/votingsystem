@@ -69,46 +69,32 @@ def profile(request):
     propossals = None
     if request.user.is_authenticated:
         try:
-            #user_detail = request.user.userdetail
-             #se buscan y se carga el objeto del user detail
-            # user_detail = UserDetail.objects.filter(user=request.user.id)
-            user_detail = UserDetail.objects.get(user=request.user.id)
-            #para simplificar el template, se sacan las propuestas por a parte
-            propossals = user_detail.propossals
-            # print(propossals)
-            # for key, value in propossals.items():
-            #     print(key, value)
-        
+            #se buscan y se carga el objeto del user detail
+            user_detail = UserDetail.objects.get(user=request.user.id)            
         except UserDetail.DoesNotExist:
-            messages.info(request, '¡Error consultando la información del usuario!')
+            pass
+
+        #para simplificar el template, se sacan las propuestas por a parte
+        try:
+            propossals = user_detail.propossals
+        except:
+            pass 
     
     if request.method == 'GET':
         return render(request, 'profile.html', {
             'user_in_group': user_in_group(request.user),
             'user_detail' : user_detail,
-            'propossals': propossals,
+            'propossals': propossals
         })
     
     elif request.method == 'POST':       
         #ESTE POST DEBE RETORNAR UN JSON RESPONSE
         #se obtienen los datos ingresados por el usuario
-        # data = json.loads(request.body)
-
-        # program_data = data.get('program', '')
         program_data = request.POST['program']
-        # profile_image_data = data.get('profile_image', '')
         profile_image_data = request.FILES['profile_image']
-        # propossals_data = request.POST['propossalsa']
         data = request.POST
         
-        print(f'Program: {program_data} \nProfile Image: {profile_image_data}\Complete Data: {data}')
-        
         if profile_image_data:
-            #Se extrae la información de la imagen
-            # formato, imgstr = profile_image_data.split(';base64,')
-            # ext = formato.split('/')[-1]
-            # image_data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-            # profile_image = request.FILES['profile_image']
             try:
                 Image.open(profile_image_data)
             except IOError:
@@ -116,12 +102,8 @@ def profile(request):
             if profile_image_data.size > 5000000:  # 5MB
                 return JsonResponse({'status': 'error', 'message': 'El tamaño de la imagen es superior al permitido, ingresa una imagen de menor tamaño.'})
             
-            # mi_modelo.imagen.save(nombre + '.' + ext, data, save=False)
-            # user_detail.profile_image.save(request.user.username + '.' + ext, image_data, save=False)
             user_detail.profile_image.save(profile_image_data.name, profile_image_data, save=False)
         
-        # data = json.loads(request.body)
-        # propossals_data = {k: v for k, v in data.items() if k.startswith('propossals')}
         propossals_data = {k: v for k, v in data.items() if k.startswith('propossals')}
         print(propossals_data)
         if not propossals_data:
@@ -135,16 +117,7 @@ def profile(request):
 
         user_detail.save()
 
-        print('nombre de la imagen cargada: '+user_detail.profile_image.name)
-        
         return JsonResponse({'status': 'ok', 'new_image':user_detail.profile_image.name})
-
-        # messages.success(request, '¡Se ha modificado el perfil correctamente!')
-        # return render(request, 'profile.html', {
-        #     'user_in_group': user_in_group(request.user),
-        #     'user_detail' : user_detail,
-        #     'propossals': propossals,
-        # })
     
 #Esta funcion es la misma del home, se podría validar como sacarla a un genérico, o incluso dejarla en el modelo
 def user_in_group(user):
@@ -182,6 +155,8 @@ class UserActions:
         except UserProfile.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'El candidato no existe en la base de datos.'})
 
+        if voter_profile.vote == 0:
+            return JsonResponse({'status': 'error', 'message': 'El usuario ya ha realizado la votación.'})
         #crear la transacción que se enviará al candidato
         trx_to_encrypt = "{'commission_id':'"+commission_id+"', 'vote':'1'}"
         #se encripta la transacción con la llave pública del candidato seleccionado
@@ -208,9 +183,6 @@ class UserActions:
 
         #como la idea es que no quede registro de quien voto por quien, se cifra el voto pero lo principal de esto no es el voto sino
         #la firma digital del votante, la que se debe validar por los nodos y ahí si emitir el voto
-
-        #se envia el voto encriptado con la llave privada (y otras cosas), fuera se envia el id user normal para que el nodo
-        #pueda ingresar a los datos del usuario para revisar su llave pública y validar la información enviada
 
     def user_has_voted_check(self, user_id):
         """

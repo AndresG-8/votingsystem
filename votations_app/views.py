@@ -50,7 +50,8 @@ def home(request):
         'active_commissions': active_commissions, #este metodo local se podíra quitar y dejar solo Votation.get_active_votations()
         'candidate' : request.user,
         'user_detail' : user_detail,
-        'latest_mempool_trx': latest_mempool_trx
+        'latest_mempool_trx': latest_mempool_trx,
+        'get_upcoming_votations': Votation.get_upcoming_votations()
     })
 
 @login_required
@@ -191,16 +192,14 @@ def vote_page(request, commission_id):
         #luego de que en la mempool hayan suficientes transacciones, 
         #se le asigna a un nodo o el nodo la toma, y las agrega a un bloque
         #luego que se agrega y se valida el bloque, se agrega a la cadena
-        
-        messages.success(request, '¡Se ha realizado la votación!')
-        
+                
         #acá se retorna el comprobante del voto y se dehabilitan los botones para votar
-        return render(request, 'vote.html', {
+        return render(request, 'trx_detail.html',{
             'user_in_group': user_in_group(request.user),
             'commission' : commission,
-            'candidates' : get_candidates(commission_id),
-            'user_profile': user_profile
+            'vuser_id': vuser_id
         })
+    
 
 @login_required
 def add_node(request):

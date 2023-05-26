@@ -27,9 +27,7 @@
                     <h6 class="card-subtitle mb-2 text-muted">{{ user.email }}</h6>
                 </div>
                 <div class="col-md-4">
-                    {% if user_in_group.admins %}
-                        <p>acá no hay nada para los admins</p>
-                    {% elif user_in_group.candidates %}
+                    {% if user_in_group.candidates %}
                         {{ user_detail.id }}
                         <p>{{ user_detail.program }}</p>
                         <p>Grupo/Plancha: {{ user_detail.candidate_group }}</p>
@@ -54,8 +52,8 @@
                             <p>No hay propuestas registradas.</p>
                         {% endif %} 
                         
-                        <p>es candidato?: {{ user_detail.is_candidate }}</p>
-                        <p>es suplente?: {{ user_detail.is_substitute }}</p>
+                        <p>¿es candidato?: {{ user_detail.is_candidate }}</p>
+                        <p>¿es suplente?: {{ user_detail.is_substitute }}</p>
                         
                     {% endif %}
                 </div>
