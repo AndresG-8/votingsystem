@@ -136,7 +136,6 @@ def vote_page(request, commission_id):
         #y de allí, del diccionario, se extraen los datos retornados para validación
         status = json_data['status']
         message = json_data['message']
-        print(f'views.py-127::\nstatus: {status}\nmessage: {message}')
 
         if status == 'error' or isinstance(message, str):
             messages.error(request, message)
@@ -152,15 +151,12 @@ def vote_page(request, commission_id):
         enc_signature = message['enc_signature']
         enc_trx = message['enc_trx']
         
-        print(f'views.py-141::\nstatus: {status}\n, message: {message}\n, vuser_id: {vuser_id}\n, cuser_id: {cuser_id}\n, enc_sig: {enc_signature}\n, enc_trx: {enc_trx}\n')
-        
         #se toma la firma y la transacción encriptada, se agrega a la mempool
         #elimino el recipient id porque la transacción encriptada (voto), a la hora del conteo, solo puede ser abierta por el candidato
         #quien tendrá que ingresar a la blockchain y revisar todas las transacciones y tomar las que se encriptaron con su clave y así realizar el conteo
         mempool = Mempool()
         mempool_trx = mempool.add_transaction(sender=vuser_id, sender_signature=enc_signature,
                                               trx_data=enc_trx, commission_id=commission_id)
-        print('views.py-150::\nTransacción agregada a la mempool:', mempool_trx)
 
         #se actualiza el voto del votante para posterior validación y se obtiene por respuesta un JsonResponse
         voter_checked = user_actions.user_has_voted_check(message['vuser_id'])
