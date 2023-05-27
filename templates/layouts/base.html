@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -18,7 +18,9 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container">
-          <a class="navbar-brand" href="/">Voting System</a>
+          <a class="navbar-brand" href="/">
+            <img src="{% static '/img/android-chrome-192x192_HNPsLMP.png' %}" alt="Logo" height="25" width"32">
+            Voting System</a>
           <button class="navbar-toggler" type="button"
             data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,9 +46,14 @@
                 <li class="nav-item"><a class="nav-link" href="{% url 'signin' %}">Ingresar</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Registrarse</a></li>
               {% endif %}
+
+              <li class="nav-item">
+                <button id="btn-dark" class="btn btn-dark btn-sm ms-2 mt-2" data-bs-theme-value="dark">Dark</button>
+                <button id="btn-light" class="btn btn-light btn-sm me-2" data-bs-theme-value="light">Light</button>
+              </li>
             </ul>
           </div>
-        </div>
+      </div>
     </nav>
 
     <main class="container" style="min-height: 80vh; margin-bottom: 30px;">
@@ -61,7 +68,7 @@
           <div class="col-12 col-md-4">
             <p class="text-center">
               <img src="{% static '/img/android-chrome-192x192_HNPsLMP.png' %}" alt="Logo" height="25" width"32">
-              &copy; <span id="current-year"></span> Andres Gómez. Medellín, Ant.
+              &copy; <span id="current-year"></span>Andres Gómez. Medellín, Ant.
             </p>
           </div>
           <div class="col-12 col-md-4">
@@ -69,31 +76,32 @@
               <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">Terminos</a></li>
               <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">Privacidad</a></li>
               <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">Map del sitio</a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">Trabajo de grado</a></li>
+              <li class="list-inline-item"><a href="https://github.com/AndresG-8/votingsystem" class="footer-link footer-link-small">Trabajo de grado</a></li>
             </ul>
           </div>
           <div class="col-12 col-md-4">
             <ul class="list-inline social-icons">
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-twitter"></i></a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-facebook"></i></a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-instagram"></i></a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-tiktok"></i></a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-github"></i></a></li>
-              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small"><i class="fab fa-gitlab"></i></a></li>
+              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">Encuentrame en github:</a></li>
+              <li class="list-inline-item"><a href="https://github.com/AndresG-8" class="footer-link footer-link-small"><i class="fab fa-github"></i></a></li>
+              <li class="list-inline-item"><a href="#" class="footer-link footer-link-small">TdeA links:</a></li>
+              <li class="list-inline-item"><a href="https://www.facebook.com/tecdeantioquia" class="footer-link footer-link-small"><i class="fab fa-facebook"></i></a></li>
+              <li class="list-inline-item"><a href="https://www.instagram.com/tecnologicodeantioquia" class="footer-link footer-link-small"><i class="fab fa-instagram"></i></a></li>
+              <li class="list-inline-item"><a href="https://www.youtube.com/c/tdeatv" class="footer-link footer-link-small"><i class="fab fa-youtube"></i></a></li>
             </ul>
           </div>
         </div>
       </div>
     </footer>
     
-    <script src="{% static 'js/generic.js' %}"></script>
-
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
     {% comment %} <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> {% endcomment %}
+    <script src="{% static 'js/generic.js' %}"></script>
     
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script> {% endcomment %}
     {% comment %} <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> {% endcomment %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
-
-
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> {% endcomment %}
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
