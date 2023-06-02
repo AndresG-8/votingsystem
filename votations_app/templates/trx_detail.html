@@ -1,0 +1,74 @@
+{% extends './layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Certificado electoral</h1>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    
+    {% if user.is_authenticated and user_in_group_and_has_permission %}
+    
+    {% endif %}
+    <div class="col-md-10 offset-md-1 mt-2">
+        <section class="card card-body">
+            
+            <div class="text-center">                
+                <img src="{% static '/img/favicon.ico' %}" alt="Logo del aplicativo" width="50px" height="50px">
+                <h1 class="text-center">Elecciones #{{ commission.id }} - {{ commission.title }}</h1>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Identificación del usuario</th>
+                    <td>{{ user.id }}</td>
+                </tr>
+                <tr>
+                    <th>Usuario en la plataforma</th>
+                    <td>{{ user.username }}</td>
+                </tr>
+                <tr>
+                    <th>Nombres y apellidos del usuario</th>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                </tr>
+                <tr>
+                    <th>Correo del usuario</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <th>Ciudad</th>
+                    <td>Medellín</td>
+                </tr>
+                <tr>
+                    <th>Departamento</th>
+                    <td>Antioquia</td>
+                </tr>
+                <tr>
+                    <th>País</th>
+                    <td>Colombia</td>
+                </tr>
+                <tr>
+                    <th>Fecha</th>
+                    <td>{% now "jS F Y H:i" %}</td>
+                </tr>
+                <tr>
+                    <th>ID único</th>
+                    <td>{{vuser_id}}</td>
+                </tr>
+            </table>
+            <button onclick="window.print()" class="btn btn-primary">Imprimir o Guardar como PDF</button>
+        </section>
+        <p><strong>Este certificado solo se muestra una vez, asegurese de imprimirlo o guardarlo.</strong></p>
+    </div>
+
+</div>
+
+{% endblock content %}

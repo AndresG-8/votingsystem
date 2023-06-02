@@ -1,0 +1,23 @@
+/* Estilos generales propios de la app */
+
+/*    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}*/
+
+/* Estilos CSS personalizados para el footer */
+
+/* Cambiar el color y resaltado de los enlaces */
+.footer-link {
+    color: white;
+    text-decoration: none;
+}
+  
+/* Reducir el tamaño de los enlaces */
+.footer-link-small {
+    font-size: 70%;
+}
+  

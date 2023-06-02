@@ -1,0 +1,114 @@
+{% extends './layouts/base.html' %}
+
+{% block content %}
+
+<div class="row py5">
+    <div class="col-md-8 offset-md-2 mt-5">
+        <h1 class="text-center">Perfil personal</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}" {% else %} class="text-center" {% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    </div>
+</div>
+
+<div class="row col-md-11 offset-md-1 mt-2">
+    
+    <section class="card card-body">
+        {% if user.is_authenticated %}
+            <div class="row">
+                <div class="col-md-2">                    
+                    <h5 class="card-title">{{ user.first_name }} {{ user.last_name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ user.email }}</h6>
+                </div>
+                <div class="col-md-4">
+                    {% if user_in_group.candidates %}
+                        {{ user_detail.id }}
+                        <p>{{ user_detail.program }}</p>
+                        <p>Grupo/Plancha: {{ user_detail.candidate_group }}</p>
+                        {% if user_detail.profile_image %}
+                            <div id="new_image">    
+                                <p><img src="{{ user_detail.profile_image.url }}" alt="Profile image" heigth="150px" width="150px"></p>
+                            </div>
+                        {% else %}
+                            <p>No profile image available.</p>
+                        {% endif %}
+                                                
+                        {% if propossals.items %}
+                        <p><strong>Listado de propuestas</strong></p>
+                        <ul>
+                            <div id="new_proposals">
+                                {% for key, value in propossals.items %}
+                                    <li>{{ value }}</li>
+                                {% endfor %}
+                            </div>
+                        </ul>
+                        {% else %}
+                            <p>No hay propuestas registradas.</p>
+                        {% endif %} 
+                        
+                        <p>¿es candidato?: {{ user_detail.is_candidate }}</p>
+                        <p>¿es suplente?: {{ user_detail.is_substitute }}</p>
+                        
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    {% if user_in_group.candidates %}
+                                            
+                        <form id="updateProfileForm" action="" method="POST" enctype="multipart/form-data" class="card card-body">
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="username">Usuario:</label>
+                                <input type="text" name="username" id="username" class="form-control" value="{{ user.username }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="program">Programa:</label>
+                                <input type="text" name="program" id="program" class="form-control" value="{{ user_detail.program }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="profile_image">Imagen de perfil:</label>
+                                <input type="file" name="profile_image" id="profile_image" class="form-control">
+                            </div>
+                            <div class="mb-3">
+
+                                {% comment %} {% if propossals.items %} {% endcomment %}
+                                <p><strong>Listado de propuestas</strong></p>                                
+                                    <div id="inputContainer">
+                                        {% for key, value in propossals.items %}
+                                            <div class="mb-3">                                                
+                                                <div class="input-group">
+                                                    <input type="text" name="propossals" class="propossals form-control" value="{{ value }}">
+                                                    <button type="button" class="remove btn btn-danger">X</button>
+                                                </div>                                                
+                                            </div>
+                                        {% endfor %}                                    
+                                        {% comment %} si se cambia algo acá en el input, se debe cambiar también en el generic.js {% endcomment %}
+                                    </div>
+                                    <button id="addProfileFormField" type="button" class="btn btn-secondary mt-3">Agregar propuesta</button>
+                                
+                                {% comment %} {% endif %} {% endcomment %}
+                            </div>
+
+                            <div id="result_message" class="alert alert-success" role="alert"></div>
+
+                            <button type="submit" class="btn btn-primary">Actualizar perfil</button>
+                        </form>
+                        {% comment %} <script type="text/javascript">
+                            var miUrl = "{% url 'profile' %}";
+                        </script>
+                        <script src="../static/js/generic.js"></script> {% endcomment %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </section>
+    
+</div>
+
+{% endblock content %}
